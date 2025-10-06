@@ -1,115 +1,674 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find This Number Game</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-color: #f0f0f0;
-        }
-        #game {
-            display: none;
-            text-align: center;
-        }
-        .button {
-            margin: 10px;
-            padding: 15px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        #feedback {
-            margin-top: 20px;
-            font-size: 20px;
-        }
-        #timer {
-            font-size: 24px;
-            color: red;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Number Finder Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: linear-gradient(135deg, #F9F871, #F5B1FC 90%);
+      font-family: 'Comic Sans MS', 'Comic Sans', cursive, Arial, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      position: relative;
+      overflow: hidden;
+    }
+    .animal-bg {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.13;
+      background-repeat: no-repeat;
+      background-position:
+        left 5% top 10%,
+        right 5% top 60%,
+        left 15% bottom 10%,
+        right 15% bottom 15%,
+        center bottom 30%;
+      background-size: 180px, 180px, 140px, 120px, 150px;
+      background-image: 
+        url('https://www.svgrepo.com/show/384119/tiger-cute.svg'),
+        url('https://www.svgrepo.com/show/384126/bunny-cute.svg'),
+        url('https://www.svgrepo.com/show/384118/monkey-cute.svg'),
+        url('https://www.svgrepo.com/show/384121/fox-cute.svg'),
+        url('https://www.svgrepo.com/show/384120/bear-cute.svg');
+    }
+    #container {
+      z-index: 1;
+      position: relative;
+      margin-top: 80px;
+      padding: 32px 24px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 32px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.10), 0 1.5px 0 #fff inset;
+      min-width: 300px;
+      max-width: 90vw;
+    }
+    h1 {
+      font-size: 2.2rem;
+      text-align: center;
+      margin-bottom: 12px;
+      color: #7F2BFA;
+      letter-spacing: 2px;
+      text-shadow: 1px 1px 0 #fff, 0 1.5px 3px #c4c4c4;
+    }
+    .friendly-prompt {
+      font-size: 1.3rem;
+      color: #2978B5;
+      margin-bottom: 24px;
+      text-align: center;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+    }
+    #difficulty, #numberRange, #numRounds, #numTimer {
+      font-size: 1.1rem;
+      padding: 6px 10px;
+      border-radius: 13px;
+      border: 1.5px solid #bdbdbd;
+      margin-right: 8px;
+      margin-bottom: 12px;
+    }
+    #startGame, #playAgain, #toggleSound, #nextAfterBigBtn {
+      font-size: 1.15rem;
+      background: linear-gradient(90deg, #A8FF78 30%, #78FFD6 100%);
+      color: #3B3B3B;
+      border: none;
+      border-radius: 18px;
+      padding: 12px 30px;
+      margin: 8px 0 20px;
+      box-shadow: 0 2px 6px #d7d7d7;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    #startGame:hover, #playAgain:hover, #toggleSound:hover, #nextAfterBigBtn:hover {
+      background: linear-gradient(90deg, #78FFD6 40%, #A8FF78 100%);
+      transform: scale(1.06);
+    }
+    #toggleSound {
+      position: absolute;
+      top: 20px;
+      right: 32px;
+      z-index: 2;
+      padding: 8px 18px;
+      font-size: 1.1rem;
+      box-shadow: 0 1px 5px #dadada;
+    }
+    #choices {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      justify-content: center;
+      margin: 18px 0 10px;
+    }
+    .choice-btn {
+      font-size: 2.1rem;
+      font-family: inherit;
+      background: linear-gradient(135deg, #F7A3FF 50%, #FFE3A3 100%);
+      color: #333;
+      border: 3.5px solid #9C5AF8;
+      border-radius: 50%;
+      width: 78px;
+      height: 78px;
+      margin: 0 6px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px #c2b9f3;
+      transition: background 0.17s, transform 0.1s, font-size 0.2s, width 0.2s, height 0.2s;
+      outline: none;
+    }
+    .choice-btn:hover, .choice-btn:focus {
+      background: linear-gradient(135deg, #FFE3A3 30%, #F7A3FF 100%);
+      transform: scale(1.08);
+      border-color: #E871C3;
+    }
+    .choice-btn.grow {
+      font-size: 4rem !important;
+      width: 160px !important;
+      height: 160px !important;
+      z-index: 10;
+      background: linear-gradient(135deg, #FFE3A3 40%, #F7A3FF 100%);
+      border-color: #FAAA74;
+      animation: pop-big 0.5s cubic-bezier(.18,.89,.32,1.28);
+    }
+    .big-btn {
+      font-size: 3.5rem;
+      width: 110px;
+      height: 110px;
+      margin: 30px auto 12px auto;
+      display: block;
+      background: #ffb6b6;
+      color: #e00404;
+      border: 5px solid #ffdddd;
+      border-radius: 50%;
+      box-shadow: 0 4px 24px #ffb6b6;
+      transition: background 0.17s, transform 0.1s;
+      animation: pop-big 0.4s cubic-bezier(.18,.89,.32,1.28);
+    }
+    .big-btn:active {
+      background: #ffe3e3;
+      color: #b90000;
+      transform: scale(0.96);
+    }
+    @keyframes pop-big {
+      0% { transform: scale(1); }
+      60% { transform: scale(1.22); }
+      100% { transform: scale(1.12); }
+    }
+    #timerSection {
+      margin: 20px 0 0 0;
+      text-align: center;
+    }
+    #timerHeadline {
+      font-size: 1.1rem;
+      color: #7F2BFA;
+      margin-bottom: 4px;
+      letter-spacing: 1px;
+      font-weight: 700;
+    }
+    #timer {
+      font-size: 2.5rem;
+      font-weight: bold;
+      text-align: center;
+      margin: 0 auto 10px auto;
+      width: 100px;
+      border-radius: 18px;
+      background: #fff7b6;
+      color: #6B2BFA;
+      box-shadow: 0 1px 8px #e7dbf0;
+      transition: background 0.3s, color 0.3s;
+      border: 3px solid #f7e5ff;
+      letter-spacing: 2px;
+      display: block;
+    }
+    #timer.red {
+      background: #ffb6b6;
+      color: #e00404;
+      border-color: #ffdddd;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 1px 8px #e7dbf0; }
+      50% { box-shadow: 0 0 24px #ffb6b6; }
+      100% { box-shadow: 0 1px 8px #e7dbf0; }
+    }
+    #feedback {
+      font-size: 1.37rem;
+      font-weight: 700;
+      margin-top: 15px;
+      text-align: center;
+      color: #2978B5;
+      min-height: 36px;
+    }
+    #scoreboard {
+      font-size: 1.15rem;
+      text-align: center;
+      background: #fff6c1;
+      color: #7F2BFA;
+      padding: 8px 24px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+      margin-top: -7px;
+      letter-spacing: 1px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      font-weight: 600;
+      box-shadow: 0 1px 4px #f0d8ff;
+    }
+    #resultsSummary {
+      font-size: 1.1rem;
+      margin: 15px 0;
+      padding: 12px 20px;
+      background: #fffbe8;
+      border-radius: 18px;
+      box-shadow: 0 2px 6px #e3d5ff;
+      color: #7F2BFA;
+      text-align: center;
+      display: none;
+    }
+    #resultsSummary ul {
+      padding-left: 0;
+      margin: 10px 0 0 0;
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+    #resultsSummary li {
+      background: #f7e5ff;
+      color: #2978B5;
+      border-radius: 12px;
+      padding: 2px 12px;
+      font-size: 1.1em;
+      margin: 0;
+    }
+    #tryMissedBtn, #newGameBtn {
+      font-size: 1.1rem;
+      border-radius: 16px;
+      background: linear-gradient(90deg, #A8FF78 30%, #78FFD6 100%);
+      border: none;
+      margin: 14px 8px 8px 8px;
+      padding: 10px 26px;
+      cursor: pointer;
+      box-shadow: 0 1px 4px #e1e1e1;
+      transition: background 0.17s, transform 0.1s;
+    }
+    #tryMissedBtn:hover, #newGameBtn:hover {
+      background: linear-gradient(90deg, #78FFD6 40%, #A8FF78 100%);
+      transform: scale(1.05);
+    }
+    @media (max-width: 500px) {
+      #container { padding: 12px 4px; }
+      .choice-btn { width: 55px; height: 55px; font-size: 1.3rem; }
+      .choice-btn.grow { width: 90px !important; height: 90px !important; font-size: 2.5rem !important; }
+      .big-btn { width: 75px; height: 75px; font-size: 2rem; }
+      #toggleSound { right: 8px; font-size: 0.95rem; }
+      #timer { font-size: 1.4rem; width: 60px; }
+    }
+    /* Hide spinner arrows for input[type=number] */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none;
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  </style>
 </head>
 <body>
-    <h1>Find This Number Game</h1>
-    <button id="startButton" class="button">Start Game</button>
-    
-    <div id="game">
-        <h2>Target Number: <span id="targetNumber"></span></h2>
-        <div id="choices"></div>
-        <div id="timer">Time Left: <span id="timeLeft">7</span> seconds</div>
-        <div id="feedback"></div>
-        <button id="playAgainButton" class="button" style="display:none;">Play Again</button>
+  <div class="animal-bg"></div>
+  <button id="toggleSound">🔊 Sound: On</button>
+  <div id="container">
+    <h1>Number Finder</h1>
+    <div id="setup">
+      <div class="friendly-prompt">Choose your options:</div>
+      <label>
+        Rounds:
+        <input type="number" id="numRounds" min="1" max="100" value="20" style="width:64px;">
+      </label>
+      <label>
+        Range:
+        <select id="numberRange">
+          <option value="20">1–20</option>
+          <option value="100">1–100</option>
+        </select>
+      </label>
+      <label>
+        Level:
+        <select id="difficulty">
+          <option value="easy">Easy (3)</option>
+          <option value="medium">Medium (5)</option>
+          <option value="hard">Hard (8)</option>
+        </select>
+      </label>
+      <label>
+        Timer (sec):
+        <input type="number" id="numTimer" min="3" max="99" value="10" style="width:54px;">
+      </label>
+      <br>
+      <button id="startGame">Start Game</button>
     </div>
+    <div id="gameArea" style="display: none;">
+      <div class="friendly-prompt">Tap the matching number!</div>
+      <div id="scoreboard">
+        <span id="scoreRight">✅ 0</span>
+        <span id="scoreWrong">❌ 0</span>
+      </div>
+      <div id="choices"></div>
+      <div id="timerSection">
+        <div id="timerHeadline">Timer</div>
+        <div id="timer">10</div>
+      </div>
+      <div id="feedback"></div>
+      <button id="playAgain" style="display:none;">Next</button>
+      <button id="nextAfterBigBtn" style="display:none;">Next</button>
+    </div>
+    <div id="resultsSummary"></div>
+  </div>
+  <audio id="ding" src="https://cdn.pixabay.com/audio/2022/03/15/audio_115b9f5f6f.mp3"></audio>
+  <audio id="whoops" src="https://cdn.pixabay.com/audio/2022/07/26/audio_124b1e3cf6.mp3"></audio>
+  <script>
+    // Praise and encouragement arrays
+    const praiseList = [
+      "Great job!", "Fantastic!", "Well done!", "Awesome!", "Super!", "Way to go!", "Excellent!", "Yay, you did it!", "You rock!", "Bravo!"
+    ];
+    const encouragementList = [
+      "That's okay, you can do it!", "Keep practicing!", "Don't give up!", "Try again, you'll get it!", "Almost!", "Nice try!", "You'll get it next time!"
+    ];
 
-    <script>
-        let targetNumber, choices, timer, timeLeft;
+    // Sound
+    let soundOn = true;
+    const ding = document.getElementById('ding');
+    const whoops = document.getElementById('whoops');
+    const toggleSoundBtn = document.getElementById('toggleSound');
+    toggleSoundBtn.addEventListener('click', () => {
+      soundOn = !soundOn;
+      toggleSoundBtn.textContent = soundOn ? "🔊 Sound: On" : "🔇 Sound: Off";
+    });
 
-        document.getElementById('startButton').addEventListener('click', startGame);
+    // DOM Elements
+    const startGameButton = document.getElementById('startGame');
+    const gameArea = document.getElementById('gameArea');
+    const choicesDiv = document.getElementById('choices');
+    const feedbackDiv = document.getElementById('feedback');
+    const playAgainButton = document.getElementById('playAgain');
+    const setupDiv = document.getElementById('setup');
+    const scoreRightSpan = document.getElementById('scoreRight');
+    const scoreWrongSpan = document.getElementById('scoreWrong');
+    const resultsSummary = document.getElementById('resultsSummary');
+    const numRoundsInput = document.getElementById('numRounds');
+    const numberRangeSelect = document.getElementById('numberRange');
+    const difficultySelect = document.getElementById('difficulty');
+    const timerDiv = document.getElementById('timer');
+    const numTimerInput = document.getElementById('numTimer');
+    const nextAfterBigBtn = document.getElementById('nextAfterBigBtn');
 
-        function startGame() {
-            document.getElementById('startButton').style.display = 'none';
-            document.getElementById('game').style.display = 'block';
-            feedback = document.getElementById('feedback');
-            feedback.innerText = '';
-            timeLeft = 7;
-            document.getElementById('timeLeft').innerText = timeLeft;
+    // Game state
+    let correctNumber;
+    let timer;
+    let scoreRight = 0;
+    let scoreWrong = 0;
+    let currentChoices = [];
+    let round = 0;
+    let totalRounds = 20;
+    let numberPool = [];
+    let usedNumbers = [];
+    let missedNumbers = [];
+    let rightNumbers = [];
+    let gameMode = "regular"; // "regular" or "missed"
+    let timerCount = 10;
+    let timerInterval = null;
+    let secPerRound = 10;
+    let oneBigBtnMode = false;
 
-            targetNumber = Math.floor(Math.random() * 100) + 1;
-            document.getElementById('targetNumber').innerText = targetNumber;
+    startGameButton.addEventListener('click', startGame);
+    playAgainButton.addEventListener('click', nextRound);
+    nextAfterBigBtn.addEventListener('click', () => {
+      nextAfterBigBtn.style.display = 'none';
+      oneBigBtnMode = false;
+      nextRound();
+    });
 
-            choices = generateChoices(targetNumber);
-            displayChoices(choices);
+    function startGame() {
+      // Read setup options
+      totalRounds = Math.max(1, Math.min(
+        parseInt(numRoundsInput.value) || 20,
+        parseInt(numberRangeSelect.value)
+      ));
+      numRoundsInput.value = totalRounds;
+      secPerRound = Math.max(3, Math.min(parseInt(numTimerInput.value) || 10, 99));
+      numTimerInput.value = secPerRound;
+      let rangeMax = parseInt(numberRangeSelect.value);
+      let numberOfChoices;
+      switch (difficultySelect.value) {
+        case 'easy':   numberOfChoices = 3; break;
+        case 'medium': numberOfChoices = 5; break;
+        case 'hard':   numberOfChoices = 8; break;
+      }
+      // Build a pool of numbers
+      numberPool = [];
+      for (let i = 1; i <= rangeMax; ++i) numberPool.push(i);
+      shuffle(numberPool); // Randomize once for unique draws
+      usedNumbers = [];
+      missedNumbers = [];
+      rightNumbers = [];
+      round = 0;
+      scoreRight = 0;
+      scoreWrong = 0;
+      updateScoreboard();
+      setupDiv.style.display = 'none';
+      resultsSummary.style.display = 'none';
+      gameArea.style.display = 'block';
+      oneBigBtnMode = false;
+      nextRound(numberOfChoices);
+    }
 
-            timer = setInterval(updateTimer, 1000);
+    function nextRound(numChoicesOverride) {
+      feedbackDiv.textContent = '';
+      playAgainButton.style.display = 'none';
+      nextAfterBigBtn.style.display = 'none';
+      let numberOfChoices;
+      switch (difficultySelect.value) {
+        case 'easy':   numberOfChoices = 3; break;
+        case 'medium': numberOfChoices = 5; break;
+        case 'hard':   numberOfChoices = 8; break;
+      }
+      if (numChoicesOverride) numberOfChoices = numChoicesOverride;
+      // Check for end of game
+      if ((gameMode === "regular" && round >= totalRounds) ||
+          (gameMode === "missed" && missedNumbers.length === 0)) {
+        showSummary();
+        return;
+      }
+      // Pick correct number
+      let pool;
+      if (gameMode === "regular") {
+        pool = numberPool.filter(n => !usedNumbers.includes(n));
+      } else { // missed mode
+        pool = missedNumbers.slice();
+      }
+      if (pool.length === 0) { showSummary(); return; }
+      correctNumber = pool.shift();
+      usedNumbers.push(correctNumber);
+
+      // Build choices
+      if (oneBigBtnMode) {
+        // Show only one big button (correct number)
+        renderBigBtn(correctNumber);
+        timerDiv.textContent = "";
+        timerDiv.classList.remove('red');
+        document.getElementById('timerHeadline').textContent = "";
+        return;
+      }
+      // Otherwise, normal round
+      document.getElementById('timerHeadline').textContent = "Timer";
+      currentChoices = [correctNumber];
+      let allChoices = gameMode === "regular"
+        ? numberPool.slice()
+        : Array.from({length: parseInt(numberRangeSelect.value)}, (_, i) => i + 1);
+      while (currentChoices.length < numberOfChoices && allChoices.length > 1) {
+        let idx = Math.floor(Math.random() * allChoices.length);
+        let n = allChoices[idx];
+        if (!currentChoices.includes(n) && n !== correctNumber) {
+          currentChoices.push(n);
         }
+        allChoices.splice(idx, 1);
+      }
+      shuffle(currentChoices);
 
-        function generateChoices(target) {
-            const choiceSet = new Set();
-            choiceSet.add(target);
-            while (choiceSet.size < 3) {
-                choiceSet.add(Math.floor(Math.random() * 100) + 1);
-            }
-            return Array.from(choiceSet);
+      round += 1;
+      renderChoices(currentChoices, true);
+      speakNumber(correctNumber);
+      startTimer();
+    }
+
+    function renderChoices(choices, enable) {
+      choicesDiv.innerHTML = '';
+      choices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = choice;
+        btn.disabled = !enable;
+        btn.addEventListener('click', () => checkAnswer(choice));
+        choicesDiv.appendChild(btn);
+      });
+    }
+
+    function renderBigBtn(number) {
+      choicesDiv.innerHTML = '';
+      const btn = document.createElement('button');
+      btn.className = 'big-btn';
+      btn.textContent = number;
+      btn.onclick = () => {
+        speakNumber(number);
+        nextAfterBigBtn.style.display = 'inline-block';
+      };
+      choicesDiv.appendChild(btn);
+    }
+
+    function speakNumber(number) {
+      if (soundOn) {
+        const utterance = new window.SpeechSynthesisUtterance(`Find the number ${number}`);
+        utterance.rate = 0.95;
+        utterance.pitch = 1.1;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function startTimer() {
+      timerCount = secPerRound;
+      updateTimerDisplay();
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timerCount--;
+        updateTimerDisplay();
+        if (timerCount <= 0) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+          handleMissed();
         }
+      }, 1000);
+    }
 
-        function displayChoices(choices) {
-            const choicesDiv = document.getElementById('choices');
-            choicesDiv.innerHTML = '';
-            choices.forEach(choice => {
-                const button = document.createElement('button');
-                button.innerText = choice;
-                button.className = 'button';
-                button.onclick = () => checkAnswer(choice);
-                choicesDiv.appendChild(button);
-            });
+    function updateTimerDisplay() {
+      timerDiv.textContent = timerCount;
+      if (timerCount <= 2) {
+        timerDiv.classList.add('red');
+      } else {
+        timerDiv.classList.remove('red');
+      }
+    }
+
+    function checkAnswer(selected) {
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
+      window.speechSynthesis.cancel();
+      if (selected === correctNumber) {
+        scoreRight++;
+        rightNumbers.push(correctNumber);
+        updateScoreboard();
+        let praise = praiseList[Math.floor(Math.random() * praiseList.length)];
+        feedbackDiv.textContent = `🎉 ${praise}`;
+        if (soundOn) {
+          ding.currentTime = 0; ding.play();
+          let u = new SpeechSynthesisUtterance(praise);
+          window.speechSynthesis.speak(u);
         }
-
-        function checkAnswer(choice) {
-            clearInterval(timer);
-            if (choice === targetNumber) {
-                feedback.innerText = 'Correct! 🎉';
-            } else {
-                feedback.innerText = 'Wrong! 😢';
-            }
-            document.getElementById('playAgainButton').style.display = 'block';
+        renderChoices(currentChoices, false);
+        setTimeout(() => nextRound(), 1100);
+      } else {
+        scoreWrong++;
+        missedNumbers.push(correctNumber);
+        updateScoreboard();
+        let encouragement = encouragementList[Math.floor(Math.random() * encouragementList.length)];
+        feedbackDiv.textContent = `❌ Oops! The number was ${correctNumber}. ${encouragement}`;
+        if (soundOn) {
+          whoops.currentTime = 0; whoops.play();
+          let u = new SpeechSynthesisUtterance(`Oops! The number was ${correctNumber}. ${encouragement}`);
+          window.speechSynthesis.speak(u);
         }
+        emphasizeCorrect();
+        timerDiv.textContent = '';
+        timerDiv.classList.remove('red');
+        document.getElementById('timerHeadline').textContent = '';
+        setTimeout(() => {
+          oneBigBtnMode = true;
+          nextRound();
+        }, 1200);
+      }
+    }
 
-        function updateTimer() {
-            timeLeft--;
-            document.getElementById('timeLeft').innerText = timeLeft;
-            if (timeLeft <= 0) {
-                clearInterval(timer);
-                feedback.innerText = 'Too slow! The correct number was ' + targetNumber + '.';
-                document.getElementById('playAgainButton').style.display = 'block';
-            }
+    function handleMissed() {
+      scoreWrong++;
+      missedNumbers.push(correctNumber);
+      updateScoreboard();
+      let encouragement = encouragementList[Math.floor(Math.random() * encouragementList.length)];
+      feedbackDiv.textContent = `⏰ Too slow! The number was ${correctNumber}. ${encouragement}`;
+      if (soundOn) {
+        whoops.currentTime = 0; whoops.play();
+        let u = new SpeechSynthesisUtterance(`Too slow! The number was ${correctNumber}. ${encouragement}`);
+        window.speechSynthesis.speak(u);
+      }
+      emphasizeCorrect();
+      timerDiv.textContent = '';
+      timerDiv.classList.remove('red');
+      document.getElementById('timerHeadline').textContent = '';
+      setTimeout(() => {
+        oneBigBtnMode = true;
+        nextRound();
+      }, 1200);
+    }
+
+    function emphasizeCorrect() {
+      Array.from(choicesDiv.children).forEach(btn => {
+        if (parseInt(btn.textContent) === correctNumber) {
+          btn.classList.add('grow');
+          btn.disabled = true;
+        } else {
+          btn.style.display = 'none';
         }
+      });
+    }
 
-        document.getElementById('playAgainButton').addEventListener('click', startGame);
-    </script>
+    function updateScoreboard() {
+      scoreRightSpan.textContent = `✅ ${scoreRight}`;
+      scoreWrongSpan.textContent = `❌ ${scoreWrong}`;
+    }
+
+    function showSummary() {
+      gameArea.style.display = 'none';
+      let html = `<h2 style="color:#7F2BFA;">All Done!</h2>`;
+      html += `<div style="margin-bottom:10px;">You got <b>${scoreRight}</b> right and <b>${scoreWrong}</b> wrong.</div>`;
+      if (rightNumbers.length > 0) {
+        html += `<div>Numbers you got right:</div><ul>${rightNumbers.map(n=>`<li>${n}</li>`).join('')}</ul>`;
+      }
+      if (missedNumbers.length > 0) {
+        html += `<div>Numbers to practice:</div><ul>${missedNumbers.map(n=>`<li>${n}</li>`).join('')}</ul>`;
+        html += `<button id="tryMissedBtn">Try Missed Numbers</button>`;
+      }
+      html += `<button id="newGameBtn">New Game</button>`;
+      resultsSummary.innerHTML = html;
+      resultsSummary.style.display = 'block';
+      // Buttons
+      setTimeout(() => {
+        const tryMissedBtn = document.getElementById('tryMissedBtn');
+        const newGameBtn = document.getElementById('newGameBtn');
+        if (tryMissedBtn) tryMissedBtn.onclick = () => {
+          // Start missed mode
+          gameMode = "missed";
+          round = 0;
+          usedNumbers = [];
+          rightNumbers = [];
+          resultsSummary.style.display = 'none';
+          gameArea.style.display = 'block';
+          oneBigBtnMode = false;
+          nextRound();
+        };
+        newGameBtn.onclick = () => {
+          resultsSummary.style.display = 'none';
+          setupDiv.style.display = 'block';
+        };
+      }, 200);
+    }
+
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+  </script>
 </body>
 </html>
