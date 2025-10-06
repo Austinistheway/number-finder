@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find This Number Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        #game {
+            display: none;
+            text-align: center;
+        }
+        .button {
+            margin: 10px;
+            padding: 15px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #feedback {
+            margin-top: 20px;
+            font-size: 20px;
+        }
+        #timer {
+            font-size: 24px;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Find This Number Game</h1>
+    <button id="startButton" class="button">Start Game</button>
+    
+    <div id="game">
+        <h2>Target Number: <span id="targetNumber"></span></h2>
+        <div id="choices"></div>
+        <div id="timer">Time Left: <span id="timeLeft">7</span> seconds</div>
+        <div id="feedback"></div>
+        <button id="playAgainButton" class="button" style="display:none;">Play Again</button>
+    </div>
+
+    <script>
+        let targetNumber, choices, timer, timeLeft;
+
+        document.getElementById('startButton').addEventListener('click', startGame);
+
+        function startGame() {
+            document.getElementById('startButton').style.display = 'none';
+            document.getElementById('game').style.display = 'block';
+            feedback = document.getElementById('feedback');
+            feedback.innerText = '';
+            timeLeft = 7;
+            document.getElementById('timeLeft').innerText = timeLeft;
+
+            targetNumber = Math.floor(Math.random() * 100) + 1;
+            document.getElementById('targetNumber').innerText = targetNumber;
+
+            choices = generateChoices(targetNumber);
+            displayChoices(choices);
+
+            timer = setInterval(updateTimer, 1000);
+        }
+
+        function generateChoices(target) {
+            const choiceSet = new Set();
+            choiceSet.add(target);
+            while (choiceSet.size < 3) {
+                choiceSet.add(Math.floor(Math.random() * 100) + 1);
+            }
+            return Array.from(choiceSet);
+        }
+
+        function displayChoices(choices) {
+            const choicesDiv = document.getElementById('choices');
+            choicesDiv.innerHTML = '';
+            choices.forEach(choice => {
+                const button = document.createElement('button');
+                button.innerText = choice;
+                button.className = 'button';
+                button.onclick = () => checkAnswer(choice);
+                choicesDiv.appendChild(button);
+            });
+        }
+
+        function checkAnswer(choice) {
+            clearInterval(timer);
+            if (choice === targetNumber) {
+                feedback.innerText = 'Correct! 🎉';
+            } else {
+                feedback.innerText = 'Wrong! 😢';
+            }
+            document.getElementById('playAgainButton').style.display = 'block';
+        }
+
+        function updateTimer() {
+            timeLeft--;
+            document.getElementById('timeLeft').innerText = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                feedback.innerText = 'Too slow! The correct number was ' + targetNumber + '.';
+                document.getElementById('playAgainButton').style.display = 'block';
+            }
+        }
+
+        document.getElementById('playAgainButton').addEventListener('click', startGame);
+    </script>
+</body>
+</html>
